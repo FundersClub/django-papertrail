@@ -14,6 +14,7 @@ setup(
     install_requires=[
         'Django>=1.7',
         'django-jsonfield>=0.8.11',
+        'six',
         'django-apptemplates',
     ],
     include_package_data=True,
