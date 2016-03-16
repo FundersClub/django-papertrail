@@ -6,7 +6,7 @@ An elegant solution for keeping a relational log of chronological events in a Dj
 .. image:: https://img.shields.io/pypi/l/django-papertrail.svg
    :target: https://pypi.python.org/pypi/django-papertrail
 
-.. image:: https://img.shields.io/pypi/v/pipreqs.svg
+.. image:: https://img.shields.io/pypi/v/django-papertrail.svg
    :target: https://pypi.python.org/pypi/django-papertrail
 
 .. image:: https://circleci.com/gh/FundersClub/django-papertrail.svg?&style=shield
