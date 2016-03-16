@@ -1,0 +1,14 @@
+{% extends 'admin:admin/change_form.html' %}
+{% load i18n admin_urls papertrail %}
+
+{% block object-tools-items %}
+    {% if original|has_papertrail %}
+        <li><a href="{{ original|adminview:'papertrail' }}" class="historylink">{% trans "Paper Trail" %}</a></li>
+    {% else %}
+        {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+        <a href="{% add_preserved_filters history_url %}" class="historylink">{% trans "History" %}</a>
+    </li>
+
+    {% endif %}
+    {% if has_absolute_url %}<li><a href="{{ absolute_url }}" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
+{% endblock %}

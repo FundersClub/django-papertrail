@@ -1,0 +1,103 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load admin_urls %}
+{% load papertrail %}
+{% load static from staticfiles %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        &rsaquo;
+        <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
+        &rsaquo;
+        <a href="{% url opts|admin_urlname:'changelist' %}">{{ module_name }}</a>
+        {% if object %}
+            &rsaquo;
+            <a href="{% url opts|admin_urlname:'changelist' %}{{ object.pk }}">{{ object|truncatewords:"18" }}</a>
+        {% endif %}
+        &rsaquo;
+        {% trans 'Paper Trail' %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        {% if available_type_filters %}
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="view_papertrail"/>
+                <input type="hidden" name="select_across" value="0"/>
+                <input type="hidden" name="index" value="0"/>
+                {% for id in selected_actions %}
+                    <input type="hidden" name="_selected_action" value="{{id}}"/>
+                {% endfor %}
+                <div class="module">
+                    {% for title in available_type_filters.keys %}
+                        <label style="display: inline-block;">
+                            <input type="checkbox" name="papertrail-selected-type-filters" value="{{ title }}" {% if title in selected_type_filters %}checked{% endif %}/>
+                            {{ title }}
+                        </label>
+                    {% endfor %}
+                    <button>Refresh</button>
+                </div>
+            </form>
+        {% endif %}
+
+        <div class="module">
+            {% if action_list %}
+                <table id="change-history">
+                    <thead>
+                    <tr>
+                        <th scope="col">{% trans 'Timestamp' %}</th>
+                        <th scope="col">{% trans 'Event Type' %}</th>
+                        <th scope="col">{% trans 'Message' %}</th>
+                        <th scope="col">{% trans 'Targets' %}</th>
+                        <th scope="col">{% trans 'Event Data' %}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for action in action_list %}
+                        <tr>
+                            <th scope="row">{{ action.timestamp|date:"DATETIME_FORMAT" }}</th>
+                            <td>
+                                <a href="{% url 'admin:papertrail_entry_change' action.id %}">{{ action.type }}</a>
+                                {% if available_type_filters %}
+                                    <br/>
+                                    <ul>
+                                        {% for title, types in available_type_filters.iteritems %}
+                                            {% if action.type in types %}
+                                                <li>{{ title }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </td>
+                            <td>{{ action.message }}</td>
+                            <td>
+                                <ul>
+                                {% for target in action.targets.all %}
+                                    <li>
+                                        <a href="{{ target.related_object|adminview:'change' }}">
+                                            {{ target.relation_name }}: {{ target.related_object }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                {% if action.data %}
+                                    {{ action.data }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>{% trans "This object doesn't have any events in its paper trail yet." %}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
