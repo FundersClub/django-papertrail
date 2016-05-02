@@ -1,6 +1,9 @@
 django-papertrail
 =================
 
+.. image:: https://raw.githubusercontent.com/FundersClub/django-papertrail/master/docs/logo.png
+
+
 An elegant solution for keeping a relational log of chronological events in a Django application.
 
 .. image:: https://img.shields.io/pypi/l/django-papertrail.svg
