@@ -203,7 +203,7 @@ class AdminEventLoggerMixin(object):
         # Once we have both pieces, we can just query the model for the ids
         return model.objects.filter(pk__in=pks)
 
-    def construct_change_message(self, request, form, formsets):
+    def construct_change_message(self, request, form, formsets, add=None):
         '''
         Construct a detailed change message from a changed object, including
         related objects updated via subforms.  Returns a JSON string containing
