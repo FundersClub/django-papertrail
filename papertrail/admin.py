@@ -69,7 +69,7 @@ class AdminEventLoggerMixin(object):
             'Created object',
             data={
                 'action': 'add',
-                'fields': fields
+                'fields': fields,
                 'message': message,
             },
             targets={
