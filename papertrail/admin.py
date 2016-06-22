@@ -53,8 +53,15 @@ class AdminEventLoggerMixin(object):
 
         return instance
 
-    def log_addition(self, request, object):
-        super(AdminEventLoggerMixin, self).log_addition(request, object)
+    def log_addition(self, request, object, message=None):
+        if message is not None:
+            super(AdminEventLoggerMixin, self).log_addition(request, object, message)
+            try:
+                message = json.loads(message)
+            except ValueError:
+                pass
+        else:
+            super(AdminEventLoggerMixin, self).log_addition(request, object)
 
         fields = self._record_changes(object)['fields']
         return papertrail.log(
@@ -63,6 +70,7 @@ class AdminEventLoggerMixin(object):
             data={
                 'action': 'add',
                 'fields': fields
+                'message': message,
             },
             targets={
                'acting_user': request.user,
