@@ -34,6 +34,7 @@ STATIC_URL = '/static/'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'testdb',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
     }
 }
