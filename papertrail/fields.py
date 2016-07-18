@@ -5,5 +5,6 @@ try:
 except:
     from jsonfield.fields import JSONField as BaseJSONField
 
+
 class JSONField(BaseJSONField):
     pass
