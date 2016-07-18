@@ -1,10 +1,11 @@
+import unittest
+from django import VERSION as django_version
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.dispatch import receiver
 from django.test import TestCase
 from django.utils import timezone
-
 from papertrail import log, signals
 from papertrail.models import Entry, related_to_q, replace_object_in_papertrail
 
@@ -157,4 +158,14 @@ class TestBasic(TestCase):
         self.assertEqual(
             Entry.objects.filter(type='test-entry').objects_not_represented(all_users, 'user').get(),
             user3
+        )
+
+    @unittest.skipIf(django_version < (1, 9), 'no native JSONField')
+    def test_json_field_filtering(self):
+        log('test', 'test', data={
+            'field': 'value',
+        })
+
+        self.assertTrue(
+            Entry.objects.filter(data__field='value').exists()
         )

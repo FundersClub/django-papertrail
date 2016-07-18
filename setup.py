@@ -9,11 +9,10 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-papertrail',
-    version='1.0.5',
+    version='1.1.0',
     packages=['papertrail'],
     install_requires=[
         'Django>=1.7',
-        'django-jsonfield>=0.8.11',
         'six',
         'django-apptemplates',
     ],

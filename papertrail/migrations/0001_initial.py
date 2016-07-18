@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import jsonfield.fields
+import papertrail.fields
 from django.db import migrations, models
 
 
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('timestamp', models.DateTimeField(db_index=True)),
                 ('type', models.CharField(max_length=50, db_index=True)),
                 ('message', models.CharField(max_length=512)),
-                ('data', jsonfield.fields.JSONField(null=True)),
+                ('data', papertrail.fields.JSONField(null=True)),
                 ('external_key', models.CharField(max_length=255, null=True, db_index=True)),
             ],
             options={

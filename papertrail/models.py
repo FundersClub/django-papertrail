@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import logging
 
-import jsonfield.fields
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -10,6 +9,7 @@ from django.db import models, transaction
 from django.utils import timezone
 
 from papertrail import signals
+from papertrail.fields import JSONField
 
 LOG = logging.getLogger(__name__)
 
@@ -202,7 +202,7 @@ class Entry(models.Model, ModelWithRelatedObjectsMixin):
     timestamp = models.DateTimeField(db_index=True)
     type = models.CharField(max_length=50, db_index=True)
     message = models.CharField(max_length=512)
-    data = jsonfield.fields.JSONField(null=True)
+    data = JSONField(null=True)
 
     # Field for storing a custom 'key' for looking up specific events from
     # external sources.  This can be used to quickly and precisely look up
