@@ -1,4 +1,4 @@
-Version 1.1.0 (UNRELEASED) - HAS BREAKING CHANGES
+Version 1.1.0 - HAS BREAKING CHANGES
 ===========================================================
 *   Switched to testing with PostgreSQL
 *   Switch to using native JSONField on Django>=1.9. If you
