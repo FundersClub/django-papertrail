@@ -1,6 +1,9 @@
 from __future__ import print_function
 
+import datetime
+import json
 import logging
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -256,7 +259,36 @@ def replace_object_in_papertrail(old_obj, new_obj, entry_qs=None):
                       related_id=new_obj.pk)
 
 
-def log(event_type, message, data=None, timestamp=None, targets=None, external_key=None):
+def json_default(o):
+    """
+    A `default` method for allowing objects with dates/decimals to be encoded into JSON.
+    Usage: json.dumps(obj, default=_json_default)
+    """
+    if hasattr(o, 'to_json'):
+        return o.to_json()
+    if isinstance(o, Decimal):
+        return str(o)
+    if isinstance(o, datetime.datetime):
+        if o.tzinfo:
+            return o.strftime('%Y-%m-%dT%H:%M:%S%z')
+        return o.strftime('%Y-%m-%dT%H:%M:%S')
+    if isinstance(o, datetime.date):
+        return o.strftime('%Y-%m-%d')
+    if isinstance(o, datetime.time):
+        if o.tzinfo:
+            return o.strftime('%H:%M:%S%z')
+        return o.strftime('%H:%M:%S')
+
+
+def json_serializeable(obj):
+    """
+    Attempts to return a copy of `obj` that is JSON serializeable
+    """
+    return json.loads(json.dumps(obj, default=json_default))
+
+
+def log(event_type, message, data=None, timestamp=None, targets=None, external_key=None, data_adapter=json_serializeable):
+    data_adapter = data_adapter or (lambda obj: obj)
     try:
         timestamp = timestamp or timezone.now()
         with transaction.atomic():
@@ -279,7 +311,7 @@ def log(event_type, message, data=None, timestamp=None, targets=None, external_k
                 entry = Entry.objects.create(
                         type=event_type,
                         message=message,
-                        data=data,
+                        data=data_adapter(data),
                         timestamp=timestamp,
                     )
 

@@ -1,3 +1,17 @@
+Version 1.1.1
+===========================================================
+*   Add a new `data_adapter` argument to `papertrail.log`. The method
+    pointed by this argument allows the caller to pass a function which
+    transforms `data` before it is written to the database. It defaults
+    to `papertrail.model.json_serializeable` which is a convenience method
+    (albeit a tad slow) used to convert complex objects into JSON-serializeable
+    representations. This includes dealing with datetime and Decimal fields
+    which are not natively supported.
+    This is a hack made necessary to allow easy logging of such data types
+    as Django's built-in `JSONField` does not provide a way to customize
+    the JSON serialization :(
+
+
 Version 1.1.0 - HAS BREAKING CHANGES
 ===========================================================
 *   Switched to testing with PostgreSQL
