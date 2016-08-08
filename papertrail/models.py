@@ -50,7 +50,11 @@ def related_to_q(obj, relation_name=None):
     content_type = ContentType.objects.get_for_model(related_qs.model)
     filters = {
         'targets__related_content_type': content_type,
-        'targets__related_id__in': related_qs.annotate(pk_varchar=Func(F('pk'), function='CAST', template='%(function)s(%(expressions)s AS varchar)')).values('pk_varchar'),
+        # related_id is a CharField, however we might be passed a QuerySet (related_qs) whose pk is
+        # an AutoField. We manually need to cast this to varchar :(
+        'targets__related_id__in': related_qs.annotate(
+            pk_varchar=Func(F('pk'), function='CAST', template='%(function)s(%(expressions)s AS varchar)')
+        ).values('pk_varchar'),
     }
     if relation_name:
         filters.update({'targets__relation_name': relation_name})
@@ -91,11 +95,17 @@ class RelatedObjectsQuerySetMixin(object):
         return related_entries.values_list('related_id', flat=True)
 
     def objects_not_represented(self, qs, relation_name):
+        # related_ids returned by _get_object_ids_in_papertrail are strings (as related_id
+        # is CharField), however the pk in `qs` might be of a different type, hence
+        # the need to call get_prep_value on all these ids.
         pks = self._get_object_ids_in_papertrail(qs, relation_name)
         pks = [qs.model._meta.pk.get_prep_value(pk) for pk in pks]
         return qs.exclude(pk__in=pks)
 
     def objects_represented(self, qs, relation_name):
+        # related_ids returned by _get_object_ids_in_papertrail are strings (as related_id
+        # is CharField), however the pk in `qs` might be of a different type, hence
+        # the need to call get_prep_value on all these ids.
         pks = self._get_object_ids_in_papertrail(qs, relation_name)
         pks = [qs.model._meta.pk.get_prep_value(pk) for pk in pks]
         return qs.filter(pk__in=pks)
