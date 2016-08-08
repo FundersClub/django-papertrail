@@ -234,7 +234,7 @@ class Entry(models.Model, ModelWithRelatedObjectsMixin):
 class RelatedObject(models.Model):
     relation_name = models.CharField(max_length=100, db_index=True)
     related_content_type = models.ForeignKey(ContentType)
-    related_id = models.CharField(max_length=32, db_index=True)
+    related_id = models.PositiveIntegerField(db_index=True)
     related_object = GenericForeignKey('related_content_type', 'related_id')
 
     class Meta:
