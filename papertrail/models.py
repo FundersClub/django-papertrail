@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
+from django.db.models import F, Func
 from django.utils import timezone
 
 from papertrail import signals
@@ -49,7 +50,7 @@ def related_to_q(obj, relation_name=None):
     content_type = ContentType.objects.get_for_model(related_qs.model)
     filters = {
         'targets__related_content_type': content_type,
-        'targets__related_id__in': related_qs,
+        'targets__related_id__in': related_qs.annotate(pk_varchar=Func(F('pk'), function='CAST', template='%(function)s(%(expressions)s AS varchar)')).values('pk_varchar'),
     }
     if relation_name:
         filters.update({'targets__relation_name': relation_name})
@@ -90,10 +91,14 @@ class RelatedObjectsQuerySetMixin(object):
         return related_entries.values_list('related_id', flat=True)
 
     def objects_not_represented(self, qs, relation_name):
-        return qs.exclude(id__in=self._get_object_ids_in_papertrail(qs, relation_name))
+        pks = self._get_object_ids_in_papertrail(qs, relation_name)
+        pks = [qs.model._meta.pk.get_prep_value(pk) for pk in pks]
+        return qs.exclude(pk__in=pks)
 
     def objects_represented(self, qs, relation_name):
-        return qs.filter(id__in=self._get_object_ids_in_papertrail(qs, relation_name))
+        pks = self._get_object_ids_in_papertrail(qs, relation_name)
+        pks = [qs.model._meta.pk.get_prep_value(pk) for pk in pks]
+        return qs.filter(pk__in=pks)
 
     def related_to(self, *relations, **named_relations):
         '''
@@ -234,7 +239,7 @@ class Entry(models.Model, ModelWithRelatedObjectsMixin):
 class RelatedObject(models.Model):
     relation_name = models.CharField(max_length=100, db_index=True)
     related_content_type = models.ForeignKey(ContentType)
-    related_id = models.PositiveIntegerField(db_index=True)
+    related_id = models.CharField(max_length=32, db_index=True)
     related_object = GenericForeignKey('related_content_type', 'related_id')
 
     class Meta:
