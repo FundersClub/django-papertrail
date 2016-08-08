@@ -1,3 +1,9 @@
+Version 1.1.2
+===========================================================
+*   Change `RelatedObject.related_id` field type to CharField to allow referencing targets
+    who override their primary key to a non-integer field type.
+
+
 Version 1.1.1
 ===========================================================
 *   Add a new `data_adapter` argument to `papertrail.log`. The method
