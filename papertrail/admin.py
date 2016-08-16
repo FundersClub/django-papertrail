@@ -3,15 +3,22 @@ import itertools
 import json
 
 from django.conf.urls import url
+from django.contrib import admin
 from django.core import serializers
+from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from django.utils.encoding import force_text
+from django.utils.html import format_html
 from django.utils.text import capfirst
 from django.utils.translation import ugettext as _
 
 import papertrail
-from papertrail.models import Entry
+from papertrail.models import Entry, EntryRelatedObject
+
+
+def admin_reverse_for_model(model):
+    return reverse('admin:{}_{}_change'.format(model._meta.app_label, model._meta.model_name), args=[model.id])
 
 
 class AdminEventLoggerMixin(object):
@@ -238,3 +245,25 @@ class AdminEventLoggerMixin(object):
                 add_related_change(changes, obj, action='add')
 
         return json.dumps(changes)
+
+
+class EntryRelatedObjectInline(admin.StackedInline):
+    model = EntryRelatedObject
+    extra = 0
+    fields = ('relation_name', 'related_content_type', 'related_model', )
+    readonly_fields = ('related_model', )
+
+    def related_model(self, obj):
+        related_obj = obj.related_object
+        return format_html(
+            u'<a href="{}">{}</a>',
+            admin_reverse_for_model(related_obj),
+            related_obj,
+        )
+
+
+@admin.register(Entry)
+class EntryAdmin(admin.ModelAdmin):
+    list_display = ('type', 'message', 'timestamp', )
+    search_fields = ('type', )
+    inlines = (EntryRelatedObjectInline, )

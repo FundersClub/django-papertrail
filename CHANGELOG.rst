@@ -1,3 +1,8 @@
+Version 1.1.2
+===========================================================
+*   Add default Entry admin
+
+
 Version 1.1.1
 ===========================================================
 *   Add a new `data_adapter` argument to `papertrail.log`. The method
