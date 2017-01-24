@@ -1,3 +1,11 @@
+Version 1.1.3
+===========================================================
+*   Make papertrail admin viewer resilient to the model class referenced
+    by the related object not being available (this would happen, for example,
+    when an app is removed from INSTALLED_APPS but it's Content Type object
+    is still in the database).
+
+
 Version 1.1.2
 ===========================================================
 *   Add default Entry admin

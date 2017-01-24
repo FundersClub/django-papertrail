@@ -77,8 +77,8 @@
                                 <ul>
                                 {% for target in action.targets.all %}
                                     <li>
-                                        <a href="{{ target.related_object|adminview:'change' }}">
-                                            {{ target.relation_name }}: {{ target.related_object }}
+                                        <a href="{{ target.safe_related_object|adminview:'change' }}">
+                                            {{ target.relation_name }}: {{ target.safe_related_object }}
                                         </a>
                                     </li>
                                 {% endfor %}

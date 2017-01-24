@@ -240,6 +240,14 @@ class RelatedObject(models.Model):
     class Meta:
         abstract = True
 
+    @property
+    def safe_related_object(self):
+        try:
+            return self.related_object
+        # This will happen if the model class of this object is not available, for example if the app providing it has been removed from INSTALLED_APPS
+        except AttributeError:
+            return None
+
 
 class EntryRelatedObject(RelatedObject):
     entry = models.ForeignKey('Entry', related_name='targets')
