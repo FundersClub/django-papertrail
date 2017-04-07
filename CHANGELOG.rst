@@ -1,3 +1,8 @@
+Version 1.1.4
+===========================================================
+*   Django 1.10 and 1.11 support.
+
+
 Version 1.1.3
 ===========================================================
 *   Make papertrail admin viewer resilient to the model class referenced

@@ -191,7 +191,7 @@ class AdminEventLoggerMixin(object):
             "admin/%s/%s/object_papertrail.html" % (app_label, opts.object_name.lower()),
             "admin/%s/object_papertrail.html" % app_label,
             "admin/object_papertrail.html"
-        ], context, current_app=self.admin_site.name)
+        ], context)
     view_papertrail.short_description = 'View Paper Trail'
 
     def _map_to_related_queryset(self, queryset, field):
