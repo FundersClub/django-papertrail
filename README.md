@@ -19,7 +19,7 @@ $ pip install django-papertrail
 
 To enable `django-papertrail` in your project you need to add it to `INSTALLED_APPS` in your projects
 `settings.py` file:
-```
+```python
 INSTALLED_APPS = (
     ...
     'papertrail',
@@ -35,7 +35,7 @@ $ python manage.py migrate
 
 ## Using it
 
-```
+```python
 import papertrail
 
 ###########################################################################
@@ -153,7 +153,7 @@ The advanced integration provides two useful functionalities:
 
 To enable the integration, your `ModelAdmin` class needs to inherit from `AdminEventLoggerMixin`:
 
-```
+```python
 from papertrail.admin import AdminEventLoggerMixin
 
 class MyObjectAdmin(AdminEventLoggerMixin, admin.ModelAdmin):
