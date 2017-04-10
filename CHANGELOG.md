@@ -1,10 +1,10 @@
 Version 1.1.4
-===========================================================
+------------------------
 *   Django 1.10 and 1.11 support.
 
 
 Version 1.1.3
-===========================================================
+------------------------
 *   Make papertrail admin viewer resilient to the model class referenced
     by the related object not being available (this would happen, for example,
     when an app is removed from INSTALLED_APPS but it's Content Type object
@@ -12,12 +12,12 @@ Version 1.1.3
 
 
 Version 1.1.2
-===========================================================
+------------------------
 *   Add default Entry admin
 
 
 Version 1.1.1
-===========================================================
+------------------------
 *   Add a new `data_adapter` argument to `papertrail.log`. The method
     pointed by this argument allows the caller to pass a function which
     transforms `data` before it is written to the database. It defaults
@@ -31,7 +31,7 @@ Version 1.1.1
 
 
 Version 1.1.0 - HAS BREAKING CHANGES
-===========================================================
+------------------------
 *   Switched to testing with PostgreSQL
 *   Switch to using native JSONField on Django>=1.9. If you
     are upgrading an existing installation you will need to
@@ -43,6 +43,5 @@ Version 1.1.0 - HAS BREAKING CHANGES
 
 
 Version 1.0.5 (2016-06-22)
-===========================================================
-
+------------------------
 *   Started tracking changes.
