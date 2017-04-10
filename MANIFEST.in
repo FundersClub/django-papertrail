@@ -1,4 +1,4 @@
-include README.rst
+include README.md
 recursive-include papertrail/templates *
 recursive-include papertrail/templatetags *
 recursive-include papertrail/migrations *
