@@ -204,7 +204,7 @@ class ModelWithRelatedObjectsMixin(object):
 class Entry(models.Model, ModelWithRelatedObjectsMixin):
     timestamp = models.DateTimeField(db_index=True)
     type = models.CharField(max_length=50, db_index=True)
-    message = models.CharField(max_length=512)
+    message = models.TextField()
     data = JSONField(null=True)
 
     # Field for storing a custom 'key' for looking up specific events from
