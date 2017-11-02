@@ -297,40 +297,38 @@ def json_serializeable(obj):
 
 def log(event_type, message, data=None, timestamp=None, targets=None, external_key=None, data_adapter=json_serializeable):
     data_adapter = data_adapter or (lambda obj: obj)
-    try:
-        timestamp = timestamp or timezone.now()
-        with transaction.atomic():
 
-            # Enforce uniqueness on event_type/external_id if an external id is
-            # provided
-            if external_key:
-                entry, created = Entry.objects.get_or_create(
+    timestamp = timestamp or timezone.now()
+
+    with transaction.atomic():
+        # Enforce uniqueness on event_type/external_id if an external id is
+        # provided
+        if external_key:
+            entry, created = Entry.objects.get_or_create(
+                type=event_type,
+                external_key=external_key,
+                defaults={
+                    'message': message,
+                    'data': data,
+                    'timestamp': timestamp,
+                }
+            )
+            if not created:
+                return
+        else:
+            entry = Entry.objects.create(
                     type=event_type,
-                    external_key=external_key,
-                    defaults={
-                        'message': message,
-                        'data': data,
-                        'timestamp': timestamp,
-                    }
+                    message=message,
+                    data=data_adapter(data),
+                    timestamp=timestamp,
                 )
-                if not created:
-                    return
-            else:
-                entry = Entry.objects.create(
-                        type=event_type,
-                        message=message,
-                        data=data_adapter(data),
-                        timestamp=timestamp,
-                    )
 
-            entry.update(targets)
-            if getattr(settings, 'PAPERTRAIL_SHOW', False):
-                WARNING = u'\033[95m'
-                ENDC = u'\033[0m'
-                print(WARNING + u'papertrail ' + ENDC + event_type + u" " + message)
-    except:
-        raise
-    else:
+        entry.update(targets)
+        if getattr(settings, 'PAPERTRAIL_SHOW', False):
+            WARNING = u'\033[95m'
+            ENDC = u'\033[0m'
+            print(WARNING + u'papertrail ' + ENDC + event_type + u" " + message)
+
         signals.event_logged.send_robust(sender=entry)
         return entry
 

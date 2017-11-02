@@ -2,7 +2,7 @@
 # available try the 3rd party jsonfield one.
 try:
     from django.contrib.postgres.fields import JSONField as BaseJSONField
-except:
+except ImportError:
     from jsonfield.fields import JSONField as BaseJSONField
 
 

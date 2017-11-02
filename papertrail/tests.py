@@ -1,4 +1,5 @@
 import unittest
+
 from django import VERSION as django_version
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -6,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.dispatch import receiver
 from django.test import TestCase
 from django.utils import timezone
+
 from papertrail import log, signals
 from papertrail.models import Entry, related_to_q, replace_object_in_papertrail
 
