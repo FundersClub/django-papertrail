@@ -1,3 +1,7 @@
+Version 1.1.5
+------------------------
+*   Update the `message` field to be a TextField.
+
 Version 1.1.4
 ------------------------
 *   Django 1.10 and 1.11 support.
