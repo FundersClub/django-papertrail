@@ -5,10 +5,9 @@ import json
 from django.conf.urls import url
 from django.contrib import admin
 from django.core import serializers
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
-from django.urls import NoReverseMatch
 from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.text import capfirst
