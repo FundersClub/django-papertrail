@@ -8,6 +8,7 @@ from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
+from django.urls import NoReverseMatch
 from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.text import capfirst
@@ -255,11 +256,14 @@ class EntryRelatedObjectInline(admin.StackedInline):
 
     def related_model(self, obj):
         related_obj = obj.related_object
-        return format_html(
-            u'<a href="{}">{}</a>',
-            admin_reverse_for_model(related_obj),
-            related_obj,
-        )
+        try:
+            return format_html(
+                u'<a href="{}">{}</a>',
+                admin_reverse_for_model(related_obj),
+                related_obj,
+            )
+        except NoReverseMatch:
+            return format_html(u'{}', related_obj)
 
 
 @admin.register(Entry)

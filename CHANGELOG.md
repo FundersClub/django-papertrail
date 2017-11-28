@@ -1,3 +1,7 @@
+Version 1.1.6
+------------------------
+*   Gracefully handle models not registered in admin when rendering papertrail entry admin pages.
+
 Version 1.1.5
 ------------------------
 *   Update the `message` field to be a TextField.
