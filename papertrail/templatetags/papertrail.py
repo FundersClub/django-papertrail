@@ -1,6 +1,11 @@
 from django import template
-from django.core.urlresolvers import NoReverseMatch, reverse
 from django.db import models
+
+try:
+    from django.core.urlresolvers import NoReverseMatch, reverse
+except ImportError:
+    from django.urls import NoReverseMatch, reverse
+
 
 register = template.Library()
 

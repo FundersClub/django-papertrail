@@ -233,7 +233,7 @@ class Entry(models.Model, ModelWithRelatedObjectsMixin):
 
 class RelatedObject(models.Model):
     relation_name = models.CharField(max_length=100, db_index=True)
-    related_content_type = models.ForeignKey(ContentType)
+    related_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     related_id = models.PositiveIntegerField(db_index=True)
     related_object = GenericForeignKey('related_content_type', 'related_id')
 
@@ -250,7 +250,7 @@ class RelatedObject(models.Model):
 
 
 class EntryRelatedObject(RelatedObject):
-    entry = models.ForeignKey('Entry', related_name='targets')
+    entry = models.ForeignKey('Entry', related_name='targets', on_delete=models.CASCADE)
     owner_field_name = 'entry'
 
 
