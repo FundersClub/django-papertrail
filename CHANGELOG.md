@@ -1,10 +1,18 @@
+Version 1.1.7
+------------------------
+*   Experimental Django2.0 support
+*   Dropped support for Django 1.7, 1.8, 1.9, Python 3.3, Python 3.4
+
+
 Version 1.1.6
 ------------------------
 *   Gracefully handle models not registered in admin when rendering papertrail entry admin pages.
 
+
 Version 1.1.5
 ------------------------
 *   Update the `message` field to be a TextField.
+
 
 Version 1.1.4
 ------------------------

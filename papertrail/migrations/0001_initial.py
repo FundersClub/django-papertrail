@@ -35,8 +35,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('relation_name', models.CharField(max_length=100, db_index=True)),
                 ('related_id', models.PositiveIntegerField(db_index=True)),
-                ('entry', models.ForeignKey(related_name='targets', to='papertrail.Entry')),
-                ('related_content_type', models.ForeignKey(to='contenttypes.ContentType')),
+                ('entry', models.ForeignKey(related_name='targets', to='papertrail.Entry', on_delete=models.CASCADE)),
+                ('related_content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
             options={
             },
