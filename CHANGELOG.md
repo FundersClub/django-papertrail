@@ -1,3 +1,8 @@
+Version 1.1.8
+------------------------
+*   Fix Django2.0 admin interface bug
+
+
 Version 1.1.7
 ------------------------
 *   Experimental Django2.0 support

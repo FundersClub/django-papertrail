@@ -217,7 +217,10 @@ class AdminEventLoggerMixin(object):
             try:
                 model = field.related.parent_model
             except AttributeError:
-                model = field.rel.model
+                try:
+                    model = field.rel.model
+                except AttributeError:
+                    model = field.related_model
 
         # Once we have both pieces, we can just query the model for the ids
         return model.objects.filter(pk__in=pks)
