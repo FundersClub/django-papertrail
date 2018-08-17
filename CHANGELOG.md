@@ -1,3 +1,8 @@
+Version 1.1.9
+------------------------
+*   Cleanup stray .pyc files
+
+
 Version 1.1.8
 ------------------------
 *   Fix Django2.0 admin interface bug

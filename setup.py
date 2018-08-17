@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-papertrail',
-    version='1.1.8',
+    version='1.1.9',
     packages=['papertrail'],
     install_requires=[
         'Django>=1.10,<2.0;python_version<"3.0"',
