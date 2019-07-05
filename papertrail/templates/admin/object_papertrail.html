@@ -100,4 +100,21 @@
             {% endif %}
         </div>
     </div>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if action_list.has_previous %}
+                <a href="?page={{ action_list.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ action_list.number }} of {{ action_list.paginator.num_pages }}.
+            </span>
+
+            {% if action_list.has_next %}
+                <a href="?page={{ action_list.next_page_number }}">next</a>
+            {% endif %}
+
+        </span>
+    </div>
 {% endblock %}
