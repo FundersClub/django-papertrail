@@ -101,20 +101,24 @@
         </div>
     </div>
 
+    {% block pagination %}
     <div class="pagination">
         <span class="step-links">
             {% if action_list.has_previous %}
-                <a href="?page={{ action_list.previous_page_number }}">previous</a>
+                <a href="?page={{ action_list.previous_page_number }}">{%  trans "previous" %}</a>
             {% endif %}
 
             <span class="current">
-                Page {{ action_list.number }} of {{ action_list.paginator.num_pages }}.
+                {%  blocktrans with page=action_list.number num_pages=action_list.paginator.num_pages %}
+                    Page {{ page }} of {{ num_pages }}.
+                {%  endblocktrans %}
             </span>
 
             {% if action_list.has_next %}
-                <a href="?page={{ action_list.next_page_number }}">next</a>
+                <a href="?page={{ action_list.next_page_number }}">{%  trans "next" %}</a>
             {% endif %}
 
         </span>
     </div>
+    {% endblock %}
 {% endblock %}
