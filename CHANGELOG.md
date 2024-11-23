@@ -1,3 +1,8 @@
+Version 1.2.0
+------------------------
+*   Add support for Django 4+
+
+
 Version 1.1.9
 ------------------------
 *   Cleanup stray .pyc files
