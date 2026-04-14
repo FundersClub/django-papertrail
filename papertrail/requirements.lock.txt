@@ -1,0 +1,4 @@
+django-apptemplates==1.5
+    # via -r requirements.txt
+six==1.17.0
+    # via -r requirements.txt
