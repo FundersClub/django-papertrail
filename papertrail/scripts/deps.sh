@@ -75,6 +75,11 @@ _compile() {
   local out_dir tmp
   out_dir="$(dirname "${out}")"
   tmp="$(mktemp "${out_dir}/.lock-compile.XXXXXX")"
+  # Pre-seed the temp file with the existing lockfile so uv reads current pins
+  # and does not silently upgrade to packages released moments ago.
+  if [[ -f "${out}" ]]; then
+    cp "${out}" "${tmp}"
+  fi
   if uv_base pip compile "${req_path}" -o "${tmp}" -p "${PYTHON_VERSION}" --no-header ${UV_COMPILE_EXTRA_ARGS}; then
     mv -f "${tmp}" "${out}"
   else
@@ -89,6 +94,9 @@ case "${1:-}" in
     ;;
   check)
     tmp="$(mktemp)"
+    # Pre-seed from the existing lockfile so check uses the same resolution
+    # baseline as 'lock', ensuring the two commands produce identical output.
+    [[ -f "${lock_path}" ]] && cp "${lock_path}" "${tmp}"
     _compile "${tmp}"
     if ! diff -q "${lock_path}" "${tmp}" >/dev/null 2>&1; then
       echo "Lockfile out of date: ${LOCK_FILE}" >&2
