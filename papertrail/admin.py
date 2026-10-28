@@ -4,6 +4,7 @@ import json
 
 from django.contrib import admin
 from django.core import serializers
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from django.urls import re_path
@@ -143,8 +144,8 @@ class AdminEventLoggerMixin(object):
         return actions
 
     def view_papertrail_item(self, request, object_id, extra_context=None):
-        get_object_or_404(self.model, id=object_id)
-        return self.view_papertrail(request, self.model.objects.filter(id=object_id))
+        get_object_or_404(self.model, pk=object_id)
+        return self.view_papertrail(request, self.model.objects.filter(pk=object_id))
 
     def view_papertrail(self, request, queryset, extra_context=None):
         '''
@@ -178,9 +179,11 @@ class AdminEventLoggerMixin(object):
             obj = None
             title = _('Paper Trail: %s %s') % (queryset.count(), opts.verbose_name_plural)
 
+        page_number = request.POST.get('page', request.GET.get('page', 1))
+        page = Paginator(action_list, self.list_per_page).get_page(page_number)
         context = {
             'title': title,
-            'action_list': action_list,
+            'action_list': page,
             'module_name': capfirst(force_str(opts.verbose_name_plural)),
             'app_label': app_label,
             'opts': opts,
@@ -188,6 +191,7 @@ class AdminEventLoggerMixin(object):
             'available_type_filters': available_type_filters,
             'selected_type_filters': selected_type_filters,
             'selected_actions': request.POST.getlist('_selected_action'),
+            'select_across': request.POST.get('select_across', '0'),
         }
         context.update(extra_context or {})
 
