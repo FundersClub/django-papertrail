@@ -9,12 +9,25 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
+from django.db.models.signals import post_save
 from django.utils import timezone
 
 from papertrail import signals
 from papertrail.fields import JSONField
 
 LOG = logging.getLogger(__name__)
+
+
+def _save_target_value(target, val):
+    if type(val) == tuple:
+        content_type, object_id = val
+        target.related_content_type = content_type
+        target.related_id = object_id
+        target.save()
+    elif val:
+        target.related_object = val
+        target.save()
+    return target
 
 
 def coerce_to_queryset(instance_or_queryset):
@@ -162,15 +175,7 @@ class ModelWithRelatedObjectsMixin(object):
             'relation_name': target_name,
         }
         target = target or self.targets_model(**attributes)
-        if type(val) == tuple:
-            content_type, object_id = val
-            target.related_content_type = content_type
-            target.related_id = object_id
-            target.save()
-        elif val:
-            target.related_object = val
-            target.save()
-        return target
+        return _save_target_value(target, val)
 
     @property
     def targets_map(self):
@@ -323,7 +328,15 @@ def log(event_type, message, data=None, timestamp=None, targets=None, external_k
                     timestamp=timestamp,
                 )
 
-        entry.update(targets)
+        if post_save.has_listeners(Entry):
+            # An entry-save hook may have populated targets already.
+            entry.update(targets)
+        else:
+            # This entry is new, so no target lookups are needed. Keep normal
+            # per-target saves and signals inside the same atomic transaction.
+            for target_name, val in (targets or {}).items():
+                target = entry.targets_model(entry=entry, relation_name=target_name)
+                _save_target_value(target, val)
         if getattr(settings, 'PAPERTRAIL_SHOW', False):
             WARNING = u'\033[95m'
             ENDC = u'\033[0m'

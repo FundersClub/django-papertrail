@@ -2,16 +2,16 @@ import collections
 import itertools
 import json
 
-from django.conf.urls import url
 from django.contrib import admin
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
-from django.utils.encoding import force_text
+from django.urls import re_path
+from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.text import capfirst
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 import papertrail
 from papertrail.models import Entry, EntryRelatedObject
@@ -132,7 +132,7 @@ class AdminEventLoggerMixin(object):
         info = self.model._meta.app_label, self.model._meta.model_name
 
         urlpatterns = [
-            url(r'^(.+)/papertrail/', self.admin_site.admin_view(self.view_papertrail_item), name=u'{0}_{1}_papertrail'.format(*info)),
+            re_path(r'^(.+)/papertrail/', self.admin_site.admin_view(self.view_papertrail_item), name=u'{0}_{1}_papertrail'.format(*info)),
         ] + super(AdminEventLoggerMixin, self).get_urls()
 
         return urlpatterns
@@ -174,25 +174,24 @@ class AdminEventLoggerMixin(object):
 
         if queryset.count() == 1:
             obj = queryset[0]
-            title = _('Paper Trail: %s') % force_text(obj)
+            title = _('Paper Trail: %s') % force_str(obj)
         else:
             obj = None
             title = _('Paper Trail: %s %s') % (queryset.count(), opts.verbose_name_plural)
 
-        paginator = Paginator(action_list, self.list_per_page)
-        page_number = request.GET.get("page") or 1
-        page = paginator.get_page(page_number)
-        page.page_num = page.number
+        page_number = request.POST.get('page', request.GET.get('page', 1))
+        page = Paginator(action_list, self.list_per_page).get_page(page_number)
         context = {
             'title': title,
             'action_list': page,
-            'module_name': capfirst(force_text(opts.verbose_name_plural)),
+            'module_name': capfirst(force_str(opts.verbose_name_plural)),
             'app_label': app_label,
             'opts': opts,
             'object': obj,
             'available_type_filters': available_type_filters,
             'selected_type_filters': selected_type_filters,
             'selected_actions': request.POST.getlist('_selected_action'),
+            'select_across': request.POST.get('select_across', '0'),
         }
         context.update(extra_context or {})
 

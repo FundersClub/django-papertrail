@@ -5,11 +5,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.dispatch import receiver
+from django.db import connection
+from django.db.models.signals import post_save
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from papertrail import log, signals
-from papertrail.models import Entry, related_to_q, replace_object_in_papertrail
+from papertrail.models import Entry, EntryRelatedObject, related_to_q, replace_object_in_papertrail
 
 User = get_user_model()
 
@@ -171,3 +174,80 @@ class TestBasic(TestCase):
         self.assertTrue(
             Entry.objects.filter(data__field='value').exists()
         )
+
+
+class TestNewEntryTargets(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('audit-user', 'audit@example.com')
+        self.group = Group.objects.create(name='Audit group')
+        self.user_type = ContentType.objects.get_for_model(User)
+        ContentType.objects.get_for_model(Group)
+
+    def test_new_targets_have_no_related_record_selects(self):
+        with CaptureQueriesContext(connection) as queries:
+            entry = log('new-targets', 'Three targets', targets={
+                'user': self.user,
+                'group': self.group,
+                'deleted-user': (self.user_type, 1000000),
+                'empty': None,
+            })
+        reads = [q['sql'] for q in queries if q['sql'].lstrip().startswith('SELECT')
+                 and 'papertrail_entryrelatedobject' in q['sql']]
+        self.assertEqual(reads, [])
+        self.assertEqual(entry.targets.count(), 3)
+        self.assertEqual(entry['user'], self.user)
+        self.assertEqual(entry['group'], self.group)
+        self.assertIsNone(entry['deleted-user'])
+        self.assertNotIn('empty', entry)
+        self.assertEqual(entry.targets.get(relation_name='deleted-user').related_id, 1000000)
+
+    def test_target_save_and_event_signals_see_saved_relations(self):
+        saved = []
+        logged = []
+
+        def target_saved(sender, instance, created, **kwargs):
+            saved.append((instance.relation_name, created))
+
+        def event_logged(sender, **kwargs):
+            logged.append(sender.targets_map)
+
+        post_save.connect(target_saved, sender=EntryRelatedObject)
+        signals.event_logged.connect(event_logged)
+        try:
+            log('new-target-signals', 'Two targets', targets={'user': self.user, 'group': self.group})
+        finally:
+            post_save.disconnect(target_saved, sender=EntryRelatedObject)
+            signals.event_logged.disconnect(event_logged)
+        self.assertEqual(saved, [('user', True), ('group', True)])
+        self.assertEqual(logged, [{'user': self.user, 'group': self.group}])
+
+    def test_invalid_target_rolls_back_entry_and_earlier_relations(self):
+        previous_target_count = EntryRelatedObject.objects.count()
+        with self.assertRaises(ValueError):
+            log('invalid-target', 'Must roll back', targets={
+                'user': self.user, 'unsaved': Group(name='Not saved'),
+            })
+        self.assertFalse(Entry.objects.filter(type='invalid-target').exists())
+        self.assertEqual(EntryRelatedObject.objects.count(), previous_target_count)
+
+    def test_external_key_does_not_add_targets_to_existing_entry(self):
+        entry = log('external-target', 'Original', targets={'user': self.user}, external_key='same')
+        result = log('external-target', 'Repeated', targets={'group': self.group}, external_key='same')
+        self.assertIsNone(result)
+        self.assertEqual(Entry.objects.filter(type='external-target').count(), 1)
+        self.assertEqual(entry.targets_map, {'user': self.user})
+
+    def test_entry_save_hooks_keep_existing_target_lookup_path(self):
+        def entry_saved(sender, instance, created, **kwargs):
+            if created:
+                instance.set('hook', self.group)
+
+        post_save.connect(entry_saved, sender=Entry)
+        try:
+            with CaptureQueriesContext(connection) as queries:
+                entry = log('entry-hook', 'Hook and input targets', targets={'user': self.user})
+        finally:
+            post_save.disconnect(entry_saved, sender=Entry)
+        self.assertEqual(entry.targets_map, {'hook': self.group, 'user': self.user})
+        self.assertTrue(any(q['sql'].lstrip().startswith('SELECT')
+                            and 'papertrail_entryrelatedobject' in q['sql'] for q in queries))

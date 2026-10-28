@@ -2,7 +2,6 @@
 {% load i18n %}
 {% load admin_urls %}
 {% load papertrail %}
-{% load static from staticfiles %}
 
 {% block breadcrumbs %}
     <div class="breadcrumbs">
@@ -26,7 +25,7 @@
             <form method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="view_papertrail"/>
-                <input type="hidden" name="select_across" value="0"/>
+                <input type="hidden" name="select_across" value="{{ select_across }}"/>
                 <input type="hidden" name="index" value="0"/>
                 {% for id in selected_actions %}
                     <input type="hidden" name="_selected_action" value="{{id}}"/>
@@ -102,10 +101,20 @@
     </div>
 
     {% block pagination %}
-    <div class="pagination">
+    <form method="POST" class="pagination">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="view_papertrail"/>
+        <input type="hidden" name="select_across" value="{{ select_across }}"/>
+        <input type="hidden" name="index" value="0"/>
+        {% for id in selected_actions %}
+            <input type="hidden" name="_selected_action" value="{{ id }}"/>
+        {% endfor %}
+        {% for selected_filter in selected_type_filters %}
+            <input type="hidden" name="papertrail-selected-type-filters" value="{{ selected_filter }}"/>
+        {% endfor %}
         <span class="step-links">
             {% if action_list.has_previous %}
-                <a href="?page={{ action_list.previous_page_number }}">{%  trans "previous" %}</a>
+                <button type="submit" name="page" value="{{ action_list.previous_page_number }}">{% trans "previous" %}</button>
             {% endif %}
 
             <span class="current">
@@ -115,10 +124,10 @@
             </span>
 
             {% if action_list.has_next %}
-                <a href="?page={{ action_list.next_page_number }}">{%  trans "next" %}</a>
+                <button type="submit" name="page" value="{{ action_list.next_page_number }}">{% trans "next" %}</button>
             {% endif %}
 
         </span>
-    </div>
+    </form>
     {% endblock %}
 {% endblock %}
